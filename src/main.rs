@@ -16,8 +16,7 @@ fn main() {
         if let Some(pathstr) = args.get(1) {
             let relpath = Path::new(pathstr);
             if let Ok(abspath) = fs::canonicalize(&relpath) {
-                println!("{:?}", abspath);
-                list_files(pathstr);
+                list_files(abspath.to_str().unwrap());
             } else {
                 eprintln!("Could not resolve path")
             }
@@ -35,7 +34,9 @@ fn list_files(path: &str) {
         if file_meta.is_file() {
             modified_time = file_meta.modified().unwrap();
             datetime = modified_time.into();
-            println!("{};{};{}", e.path().display(), datetime.to_rfc2822(), file_meta.len());
+            let mut scan_path = e.path().display().to_string();
+            scan_path = scan_path.replace(path, "");
+            println!("{};{};{}", scan_path, datetime.timestamp(), file_meta.len());
         }
     }
 }
